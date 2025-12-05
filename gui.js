@@ -33,6 +33,7 @@ function setupGUI() {
   const guiHTML = `
     <div id="custom-gui" role="complementary" aria-label="Control panel">
       <div class="gui-handle" id="gui-handle" role="button" aria-label="Toggle controls" tabindex="0">
+        <span class="handle-text">hide/show controls</span>
         <span class="handle-icon">▼</span>
       </div>
       <div class="gui-section presets-section">
@@ -272,14 +273,17 @@ function setupEyeJoystick() {
     const x = ((params.modulationCenterX + 1) / 2) * w;
     const y = ((-params.modulationCenterY + 1) / 2) * h;
 
+    // Check if LFO-controlled
+    const isLFOControlled = activeLFOMap && (activeLFOMap.modulationCenterX || activeLFOMap.modulationCenterY);
+
     // Draw eye dot
-    ctx.fillStyle = "#4a9eff";
+    ctx.fillStyle = isLFOControlled ? "#888" : "#4a9eff";
     ctx.beginPath();
     ctx.arc(x, y, 6, 0, Math.PI * 2);
     ctx.fill();
 
     // Outline
-    ctx.strokeStyle = "#6bb3ff";
+    ctx.strokeStyle = isLFOControlled ? "#999" : "#6bb3ff";
     ctx.lineWidth = 2;
     ctx.stroke();
   }
@@ -422,7 +426,7 @@ function setupGUIToggle() {
   // Show hint (always show for now)
   const hint = document.createElement("div");
   hint.className = "gui-hint";
-  hint.textContent = "Click handle or press H to hide controls";
+  hint.textContent = "Click ▼ at bottom or press H to hide/show controls";
   document.body.appendChild(hint);
 
   // Fade out after 5 seconds

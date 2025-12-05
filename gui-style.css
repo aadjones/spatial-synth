@@ -28,6 +28,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  gap: 8px;
   padding: 8px;
   cursor: pointer;
   user-select: none;
@@ -38,6 +39,18 @@
 
 .gui-handle:hover {
   background: rgba(255, 255, 255, 0.05);
+}
+
+.handle-text {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: color 0.2s ease;
+}
+
+.gui-handle:hover .handle-text {
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .handle-icon {
@@ -206,6 +219,26 @@
 
 .control-group.lfo-controlled label {
   color: rgba(255, 150, 150, 0.8);
+}
+
+.control-group.lfo-controlled input[type="range"]::-webkit-slider-thumb {
+  background: #888;
+  cursor: not-allowed;
+}
+
+.control-group.lfo-controlled input[type="range"]::-webkit-slider-thumb:hover {
+  background: #888;
+  transform: none;
+}
+
+.control-group.lfo-controlled input[type="range"]::-moz-range-thumb {
+  background: #888;
+  cursor: not-allowed;
+}
+
+.control-group.lfo-controlled input[type="range"]::-moz-range-thumb:hover {
+  background: #888;
+  transform: none;
 }
 
 .control-group input[type="range"]::-webkit-slider-thumb {
