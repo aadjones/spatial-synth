@@ -1,5 +1,6 @@
 let myShader;
 let lfoEngine;
+let presetManager;
 
 // Backwards compatibility - expose activeLFOMap for GUI
 let activeLFOMap = null;
@@ -13,6 +14,9 @@ function setup() {
 
   // Initialize LFO engine
   lfoEngine = new LFOEngine(parameterStore);
+
+  // Initialize preset manager
+  presetManager = new PresetManager(lfoEngine);
 
   setupGUI();
 }
@@ -67,35 +71,21 @@ function windowResized() {
 }
 
 ////////////////////////////////////////
-// Presets
+// Presets - Backwards compatibility wrappers
 ////////////////////////////////////////
 
 function gentleWaves() {
-  lfoEngine.setMap({
-    carrierFreqX: { frequency: 0.2, amplitude: 0.3, center: 0.5, phase: 0 },
-    carrierFreqY: { frequency: 0.15, amplitude: 0.2, center: 0.5, phase: Math.PI / 2 },
-    modulatorFreq: { frequency: 0.1, amplitude: 0.2, center: 0.5, phase: Math.PI },
-  });
+  presetManager.apply('gentleWaves');
 }
 
 function wildRipples() {
-  lfoEngine.setMap({
-    carrierFreqX: { frequency: 0.8, amplitude: 0.6, center: 0.7, phase: 0 },
-    carrierFreqY: { frequency: 0.6, amplitude: 0.5, center: 0.7, phase: Math.PI / 3 },
-    modulatorFreq: { frequency: 0.4, amplitude: 0.4, center: 0.6, phase: Math.PI / 2 },
-    modulationIndex: { frequency: 0.3, amplitude: 1.5, center: 2.0, phase: Math.PI },
-  });
+  presetManager.apply('wildRipples');
 }
 
 function pulsatingEye() {
-  lfoEngine.setMap({
-    modulationIndex: { frequency: 0.2, amplitude: 1.5, center: 2.0, phase: 0 },
-    amplitudeModulationIndex: { frequency: 0.15, amplitude: 1.0, center: 1.5, phase: Math.PI / 2 },
-    modulationCenterX: { frequency: 0.1, amplitude: 0.5, center: 0.0, phase: 0 },
-    modulationCenterY: { frequency: 0.1, amplitude: 0.5, center: 0.0, phase: Math.PI / 2 },
-  });
+  presetManager.apply('pulsatingEye');
 }
 
 function manualMode() {
-  lfoEngine.clear();
+  presetManager.apply('manual');
 }
