@@ -5,6 +5,23 @@ document.addEventListener('DOMContentLoaded', () => {
   const experience = document.getElementById('experience');
   const loadingIndicator = document.getElementById('loading-indicator');
 
+  // Check if mobile device
+  function isMobileDevice() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+           (window.innerWidth <= 768);
+  }
+
+  // Block mobile devices
+  if (isMobileDevice()) {
+    const note = document.querySelector('.note');
+    note.textContent = 'This experience requires desktop. Please visit on a computer.';
+    note.style.color = '#ff6b6b';
+    beginBtn.disabled = true;
+    beginBtn.style.opacity = '0.5';
+    beginBtn.style.cursor = 'not-allowed';
+    return;
+  }
+
   // Check for WebGL support
   function isWebGLAvailable() {
     try {
