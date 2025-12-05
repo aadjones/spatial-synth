@@ -1,6 +1,8 @@
 let myShader;
-let activeLFOMap = null;
+let lfoEngine;
 
+// Backwards compatibility - expose activeLFOMap for GUI
+let activeLFOMap = null;
 
 function preload() {
   myShader = loadShader('shader.vert', 'fm.frag');
@@ -8,11 +10,23 @@ function preload() {
 
 function setup() {
   createMyCanvas();
+
+  // Initialize LFO engine
+  lfoEngine = new LFOEngine(parameterStore);
+
   setupGUI();
 }
 
 function draw() {
-  updateParamsFromLFOs(millis() / 1000.0);
+  // Update LFO-controlled parameters
+  lfoEngine.update(millis() / 1000.0);
+
+  // Keep legacy params object in sync for setShaderUniforms
+  params = parameterStore.getAll();
+
+  // Keep activeLFOMap in sync for GUI
+  activeLFOMap = lfoEngine.getMap();
+
   updateGUI();
   setShaderUniforms();
   shader(myShader);
@@ -52,60 +66,36 @@ function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
 }
 
-function updateParamsFromLFOs(time) {
-  if (!activeLFOMap) return;
-
-  for (let param in activeLFOMap) {
-    let lfo = activeLFOMap[param];
-    parameterStore.set(param, lfo.center + lfo.amplitude * Math.sin(TWO_PI * lfo.frequency * time + lfo.phase));
-  }
-
-  // Keep legacy params object in sync for setShaderUniforms
-  params = parameterStore.getAll();
-}
-
 ////////////////////////////////////////
 // Presets
 ////////////////////////////////////////
 
 function gentleWaves() {
-  activeLFOMap = {
+  lfoEngine.setMap({
     carrierFreqX: { frequency: 0.2, amplitude: 0.3, center: 0.5, phase: 0 },
     carrierFreqY: { frequency: 0.15, amplitude: 0.2, center: 0.5, phase: Math.PI / 2 },
     modulatorFreq: { frequency: 0.1, amplitude: 0.2, center: 0.5, phase: Math.PI },
-  };
+  });
 }
 
 function wildRipples() {
-  activeLFOMap = {
+  lfoEngine.setMap({
     carrierFreqX: { frequency: 0.8, amplitude: 0.6, center: 0.7, phase: 0 },
     carrierFreqY: { frequency: 0.6, amplitude: 0.5, center: 0.7, phase: Math.PI / 3 },
     modulatorFreq: { frequency: 0.4, amplitude: 0.4, center: 0.6, phase: Math.PI / 2 },
     modulationIndex: { frequency: 0.3, amplitude: 1.5, center: 2.0, phase: Math.PI },
-  };
+  });
 }
 
 function pulsatingEye() {
-  activeLFOMap = {
+  lfoEngine.setMap({
     modulationIndex: { frequency: 0.2, amplitude: 1.5, center: 2.0, phase: 0 },
     amplitudeModulationIndex: { frequency: 0.15, amplitude: 1.0, center: 1.5, phase: Math.PI / 2 },
     modulationCenterX: { frequency: 0.1, amplitude: 0.5, center: 0.0, phase: 0 },
     modulationCenterY: { frequency: 0.1, amplitude: 0.5, center: 0.0, phase: Math.PI / 2 },
-  };
-}
-
-function updateGUI() {
-  carrierFreqXController.updateDisplay();
-  carrierFreqYController.updateDisplay();
-  modulatorFreqController.updateDisplay();
-  modulationIndexController.updateDisplay();
-  amplitudeModulationIndexController.updateDisplay();
-  modulationCenterXController.updateDisplay();
-  modulationCenterYController.updateDisplay();
-  lfoFrequencyController.updateDisplay();
-  lfoAmplitudeController.updateDisplay();
+  });
 }
 
 function manualMode() {
-  activeLFOMap = null;
+  lfoEngine.clear();
 }
