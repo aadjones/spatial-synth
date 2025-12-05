@@ -57,8 +57,11 @@ function updateParamsFromLFOs(time) {
 
   for (let param in activeLFOMap) {
     let lfo = activeLFOMap[param];
-    params[param] = lfo.center + lfo.amplitude * Math.sin(TWO_PI * lfo.frequency * time + lfo.phase);
+    parameterStore.set(param, lfo.center + lfo.amplitude * Math.sin(TWO_PI * lfo.frequency * time + lfo.phase));
   }
+
+  // Keep legacy params object in sync for setShaderUniforms
+  params = parameterStore.getAll();
 }
 
 ////////////////////////////////////////

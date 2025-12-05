@@ -1,4 +1,5 @@
-let params = {
+// Initialize parameter store
+const parameterStore = new ParameterStore({
   carrierFreqX: 0.5,
   carrierFreqY: 0.5,
   modulatorFreq: 0.5,
@@ -10,7 +11,10 @@ let params = {
   lfoAmplitude: 0.5,
   speedLevel: 1, // 1-5 discrete
   intensityLevel: 3, // 1-5 discrete
-};
+});
+
+// Backwards compatibility - keep params object for now
+let params = parameterStore.getAll();
 
 let activePreset = "manual";
 
@@ -187,26 +191,32 @@ function attachEventListeners() {
     const input = document.getElementById(id);
 
     input.addEventListener("input", (e) => {
-      params[param] = parseFloat(e.target.value);
+      parameterStore.set(param, parseFloat(e.target.value));
+      params = parameterStore.getAll(); // Keep legacy object in sync
     });
   });
 }
 
 function changeSpeed(delta) {
-  params.speedLevel = Math.max(1, Math.min(5, params.speedLevel + delta));
+  const newLevel = Math.max(1, Math.min(5, parameterStore.get('speedLevel') + delta));
+  parameterStore.set('speedLevel', newLevel);
+  params = parameterStore.getAll(); // Keep legacy object in sync
   updateDanceParams();
   updateDanceDisplay();
 }
 
 function changeIntensity(delta) {
-  params.intensityLevel = Math.max(1, Math.min(5, params.intensityLevel + delta));
+  const newLevel = Math.max(1, Math.min(5, parameterStore.get('intensityLevel') + delta));
+  parameterStore.set('intensityLevel', newLevel);
+  params = parameterStore.getAll(); // Keep legacy object in sync
   updateDanceParams();
   updateDanceDisplay();
 }
 
 function updateDanceParams() {
-  params.lfoFrequency = getSpeedValue(params.speedLevel);
-  params.lfoAmplitude = getIntensityValue(params.intensityLevel);
+  parameterStore.set('lfoFrequency', getSpeedValue(parameterStore.get('speedLevel')));
+  parameterStore.set('lfoAmplitude', getIntensityValue(parameterStore.get('intensityLevel')));
+  params = parameterStore.getAll(); // Keep legacy object in sync
 }
 
 function updateDanceDisplay() {
@@ -288,8 +298,9 @@ function setupEyeJoystick() {
     const clampedY = Math.max(dotRadius, Math.min(h - dotRadius, y));
 
     // Convert to -1 to 1 range (invert Y so up is negative)
-    params.modulationCenterX = (clampedX / w) * 2 - 1;
-    params.modulationCenterY = -((clampedY / h) * 2 - 1);
+    parameterStore.set('modulationCenterX', (clampedX / w) * 2 - 1);
+    parameterStore.set('modulationCenterY', -((clampedY / h) * 2 - 1));
+    params = parameterStore.getAll(); // Keep legacy object in sync
 
     drawJoystick();
   }
@@ -341,24 +352,30 @@ function setupEyeJoystick() {
 
     switch (e.key) {
       case "ArrowLeft":
-        params.modulationCenterX = Math.max(
-          -1,
-          params.modulationCenterX - step
+        parameterStore.set(
+          'modulationCenterX',
+          Math.max(-1, parameterStore.get('modulationCenterX') - step)
         );
         changed = true;
         break;
       case "ArrowRight":
-        params.modulationCenterX = Math.min(1, params.modulationCenterX + step);
+        parameterStore.set(
+          'modulationCenterX',
+          Math.min(1, parameterStore.get('modulationCenterX') + step)
+        );
         changed = true;
         break;
       case "ArrowUp":
-        params.modulationCenterY = Math.min(1, params.modulationCenterY + step);
+        parameterStore.set(
+          'modulationCenterY',
+          Math.min(1, parameterStore.get('modulationCenterY') + step)
+        );
         changed = true;
         break;
       case "ArrowDown":
-        params.modulationCenterY = Math.max(
-          -1,
-          params.modulationCenterY - step
+        parameterStore.set(
+          'modulationCenterY',
+          Math.max(-1, parameterStore.get('modulationCenterY') - step)
         );
         changed = true;
         break;
@@ -366,6 +383,7 @@ function setupEyeJoystick() {
 
     if (changed) {
       e.preventDefault();
+      params = parameterStore.getAll(); // Keep legacy object in sync
       drawJoystick();
     }
   });
