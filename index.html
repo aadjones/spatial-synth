@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spatial Synthesizer - Aaron Demby Jones</title>
+    <meta name="description" content="An interactive visual experience exploring frequency modulation and spatial wave patterns through real-time WebGL shader visualization." />
+
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Spatial Synthesizer - Aaron Demby Jones" />
+    <meta property="og:description" content="An interactive visual experience exploring frequency modulation and spatial wave patterns through real-time WebGL shader visualization." />
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/p5.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/addons/p5.sound.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <link rel="stylesheet" type="text/css" href="gui-style.css" />
+    <link rel="stylesheet" type="text/css" href="landing.css" />
+  </head>
+  <body>
+    <div id="landing-page">
+      <div class="landing-content">
+        <h1 class="title">Spatial Synthesizer</h1>
+        <p class="artist">by Aaron Demby Jones</p>
+        <p class="note">Best experienced on desktop at full screen</p>
+        <button id="begin-btn" class="begin-button">
+          Play the synthesizer
+        </button>
+        <div id="loading-indicator" class="loading-indicator">
+          <div class="loading-spinner"></div>
+          <div class="loading-text">Loading...</div>
+        </div>
+      </div>
+    </div>
+    <main id="experience" style="display: none"></main>
+    <script src="sketch.js"></script>
+    <script src="gui.js"></script>
+    <script src="landing.js"></script>
+  </body>
+</html>
