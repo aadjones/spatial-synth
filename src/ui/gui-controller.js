@@ -17,6 +17,7 @@ const GUIController = (function () {
       this._lfoEngine = lfoEngine;
       this._activePreset = 'manual';
       this._liveRegion = null;
+      this._joystick = null;
 
       // Map discrete levels to actual values
       this._speedMap = [0.0, 0.05, 0.2, 0.5, 1.0, 2.0];
@@ -189,185 +190,30 @@ const GUIController = (function () {
      * Setup the eye joystick control
      */
     _setupEyeJoystick() {
-      const canvas = document.getElementById('eyeJoystick');
-      const ctx = canvas.getContext('2d');
-      let isDragging = false;
-
-      const drawJoystick = () => {
-        const w = canvas.width;
-        const h = canvas.height;
-
-        // Clear
-        ctx.clearRect(0, 0, w, h);
-
-        // Background
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-        ctx.fillRect(0, 0, w, h);
-
-        // Border
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-        ctx.lineWidth = 1;
-        ctx.strokeRect(0, 0, w, h);
-
-        // Center crosshair
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(w / 2, 0);
-        ctx.lineTo(w / 2, h);
-        ctx.moveTo(0, h / 2);
-        ctx.lineTo(w, h / 2);
-        ctx.stroke();
-
-        // Eye position (map -1,1 to canvas coords, invert Y for display)
-        const x = ((this._parameterStore.get('modulationCenterX') + 1) / 2) * w;
-        const y = ((-this._parameterStore.get('modulationCenterY') + 1) / 2) * h;
-
-        // Check if LFO-controlled
-        const isLFOControlled =
-          this._lfoEngine.isParameterControlled('modulationCenterX') ||
-          this._lfoEngine.isParameterControlled('modulationCenterY');
-
-        // Draw eye dot
-        ctx.fillStyle = isLFOControlled ? '#888' : '#4a9eff';
-        ctx.beginPath();
-        ctx.arc(x, y, 6, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Outline
-        ctx.strokeStyle = isLFOControlled ? '#999' : '#6bb3ff';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-      };
-
-      const updateFromMouse = (e) => {
-        const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-
-        const dotRadius = 6;
-        const w = canvas.width;
-        const h = canvas.height;
-
-        // Clamp pixel coordinates to keep dot inside canvas
-        const clampedX = Math.max(dotRadius, Math.min(w - dotRadius, x));
-        const clampedY = Math.max(dotRadius, Math.min(h - dotRadius, y));
-
-        // Convert to -1 to 1 range (invert Y so up is negative)
-        this._parameterStore.set('modulationCenterX', (clampedX / w) * 2 - 1);
-        this._parameterStore.set('modulationCenterY', -((clampedY / h) * 2 - 1));
-
-        drawJoystick();
-      };
-
-      // Mouse events
-      canvas.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        updateFromMouse(e);
-      });
-
-      canvas.addEventListener('mousemove', (e) => {
-        if (isDragging) {
-          updateFromMouse(e);
-        }
-      });
-
-      canvas.addEventListener('mouseup', () => {
-        isDragging = false;
-      });
-
-      canvas.addEventListener('mouseleave', () => {
-        isDragging = false;
-      });
-
-      // Touch events
-      canvas.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        isDragging = true;
-        const touch = e.touches[0];
-        updateFromMouse(touch);
-      });
-
-      canvas.addEventListener('touchmove', (e) => {
-        e.preventDefault();
-        if (isDragging) {
-          const touch = e.touches[0];
-          updateFromMouse(touch);
-        }
-      });
-
-      canvas.addEventListener('touchend', () => {
-        isDragging = false;
-      });
-
-      // Keyboard navigation
-      canvas.setAttribute('tabindex', '0');
-      canvas.addEventListener('keydown', (e) => {
-        const step = e.shiftKey ? 0.1 : 0.05;
-        let changed = false;
-
-        switch (e.key) {
-          case 'ArrowLeft':
-            this._parameterStore.set(
-              'modulationCenterX',
-              Math.max(-1, this._parameterStore.get('modulationCenterX') - step)
-            );
-            changed = true;
-            break;
-          case 'ArrowRight':
-            this._parameterStore.set(
-              'modulationCenterX',
-              Math.min(1, this._parameterStore.get('modulationCenterX') + step)
-            );
-            changed = true;
-            break;
-          case 'ArrowUp':
-            this._parameterStore.set(
-              'modulationCenterY',
-              Math.min(1, this._parameterStore.get('modulationCenterY') + step)
-            );
-            changed = true;
-            break;
-          case 'ArrowDown':
-            this._parameterStore.set(
-              'modulationCenterY',
-              Math.max(-1, this._parameterStore.get('modulationCenterY') - step)
-            );
-            changed = true;
-            break;
-        }
-
-        if (changed) {
-          e.preventDefault();
-          drawJoystick();
-        }
-      });
-
-      // Initial draw
-      drawJoystick();
-
-      // Store reference for updates
-      this._drawJoystick = drawJoystick;
+      this._joystick = new JoystickWidget(
+        'eyeJoystick',
+        this._parameterStore,
+        'modulationCenterX',
+        'modulationCenterY',
+        this._lfoEngine
+      );
     }
 
     /**
      * Update joystick visual and LFO indicator
      */
     _updateJoystick() {
-      if (this._drawJoystick) {
-        this._drawJoystick();
-      }
+      if (this._joystick) {
+        this._joystick.draw();
 
-      // Mark joystick as LFO-controlled if modulation center is animated
-      const joystickContainer = document.querySelector('.eye-joystick-container');
-      if (joystickContainer) {
-        if (
-          this._lfoEngine.isParameterControlled('modulationCenterX') ||
-          this._lfoEngine.isParameterControlled('modulationCenterY')
-        ) {
-          joystickContainer.classList.add('lfo-controlled');
-        } else {
-          joystickContainer.classList.remove('lfo-controlled');
+        // Mark joystick container as LFO-controlled
+        const joystickContainer = document.querySelector('.eye-joystick-container');
+        if (joystickContainer) {
+          if (this._joystick.isLFOControlled()) {
+            joystickContainer.classList.add('lfo-controlled');
+          } else {
+            joystickContainer.classList.remove('lfo-controlled');
+          }
         }
       }
     }

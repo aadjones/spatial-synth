@@ -2,9 +2,6 @@ let myShader;
 let lfoEngine;
 let presetManager;
 
-// Backwards compatibility - expose activeLFOMap for GUI
-let activeLFOMap = null;
-
 function preload() {
   myShader = loadShader('shader.vert', 'fm.frag');
 }
