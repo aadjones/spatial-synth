@@ -1,3 +1,13 @@
+/**
+ * Main p5.js Sketch
+ *
+ * This is the p5.js application entry point. It handles:
+ * - Shader loading and rendering
+ * - Main draw loop coordination
+ * - LFO engine updates
+ * - Canvas setup and user interactions (fullscreen, screenshots)
+ */
+
 let myShader;
 let lfoEngine;
 let presetManager;

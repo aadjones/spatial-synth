@@ -1,4 +1,14 @@
-// Initialize parameter store
+/**
+ * GUI Application Entry Point
+ *
+ * This file initializes the modular architecture and provides the main API
+ * for the p5.js sketch. It coordinates between:
+ * - Core: ParameterStore, LFOEngine, PresetManager
+ * - UI: GUIBuilder, GUIController, JoystickWidget
+ * - Rendering: ShaderBridge
+ */
+
+// Initialize parameter store with defaults
 const parameterStore = new ParameterStore({
   carrierFreqX: 0.5,
   carrierFreqY: 0.5,
@@ -13,16 +23,14 @@ const parameterStore = new ParameterStore({
   intensityLevel: 3, // 1-5 discrete
 });
 
-// Backwards compatibility - keep params object for now
-let params = parameterStore.getAll();
-
-// Global instances
+// Global module instances
 let guiBuilder;
 let guiController;
 let shaderBridge;
 
-// Backwards compatibility - expose activeLFOMap for external use
-let activeLFOMap = null;
+// Legacy globals for backwards compatibility
+let params = parameterStore.getAll(); // Used by sketch.js draw loop
+let activeLFOMap = null; // Exposed for external reference
 
 function setupGUI() {
   // Create instances

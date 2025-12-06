@@ -33,19 +33,23 @@
       </div>
     </div>
     <main id="experience" style="display: none"></main>
-    <!-- Core modules -->
-    <script src="src/core/parameters.js"></script>
-    <script src="src/core/lfo-engine.js"></script>
-    <script src="src/core/presets.js"></script>
-    <!-- UI modules -->
-    <script src="src/ui/joystick-widget.js"></script>
-    <script src="src/ui/gui-builder.js"></script>
-    <script src="src/ui/gui-controller.js"></script>
-    <!-- Rendering modules -->
-    <script src="src/rendering/shader-bridge.js"></script>
-    <!-- Application -->
-    <script src="gui.js"></script>
-    <script src="sketch.js"></script>
-    <script src="landing.js"></script>
+
+    <!-- Core modules: Data management and business logic -->
+    <script src="src/core/parameters.js"></script>    <!-- ParameterStore: Centralized parameter state -->
+    <script src="src/core/lfo-engine.js"></script>    <!-- LFOEngine: Parameter automation -->
+    <script src="src/core/presets.js"></script>       <!-- PresetManager: Preset definitions -->
+
+    <!-- UI modules: User interface components -->
+    <script src="src/ui/joystick-widget.js"></script>   <!-- JoystickWidget: 2D joystick control -->
+    <script src="src/ui/gui-builder.js"></script>       <!-- GUIBuilder: HTML construction -->
+    <script src="src/ui/gui-controller.js"></script>    <!-- GUIController: Event handling -->
+
+    <!-- Rendering modules: Graphics pipeline -->
+    <script src="src/rendering/shader-bridge.js"></script>  <!-- ShaderBridge: Param to uniform mapping -->
+
+    <!-- Application: Main coordination layer -->
+    <script src="gui.js"></script>       <!-- GUI initialization and API -->
+    <script src="sketch.js"></script>    <!-- p5.js main sketch -->
+    <script src="landing.js"></script>   <!-- Landing page interaction -->
   </body>
 </html>
