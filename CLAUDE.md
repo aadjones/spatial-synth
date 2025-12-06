@@ -25,46 +25,49 @@ The application runs entirely in the browser with no backend or build process.
 
 ## Architecture
 
-### Core Components
+This project follows a modular architecture with clean separation of concerns. For detailed architecture documentation, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
-**sketch.js** - Main p5.js application loop
-- `preload()`: Loads the GLSL shaders (vertex and fragment)
-- `setup()`: Initializes canvas and GUI
-- `draw()`: Main render loop that updates LFO parameters, GUI state, and shader uniforms
-- `updateParamsFromLFOs()`: Applies sinusoidal modulation to parameters based on active preset
-- Preset functions (`gentleWaves()`, `wildRipples()`, `pulsatingEye()`): Define LFO mappings for animated presets
+### Quick Reference
 
-**gui.js** - Custom HTML interface and parameter management
-- `params` object: Central store for all synthesis parameters
-- `setupGUI()`: Creates custom HTML controls positioned at the bottom of the screen in a horizontal layout
-- `attachEventListeners()`: Binds range input events to update params object in real-time
-- `updateGUI()`: Syncs GUI display with current parameter values (used by LFO presets)
-- `setShaderUniforms()`: Maps JavaScript parameters to GLSL uniforms
+**Directory Structure:**
+```
+src/
+├── core/              # Data and business logic
+│   ├── parameters.js  # ParameterStore (single source of truth)
+│   ├── lfo-engine.js  # LFOEngine (parameter automation)
+│   └── presets.js     # PresetManager (preset definitions)
+├── ui/                # User interface
+│   ├── gui-builder.js    # GUIBuilder (HTML construction)
+│   ├── gui-controller.js # GUIController (event handling)
+│   └── joystick-widget.js # JoystickWidget (2D control)
+└── rendering/         # Graphics pipeline
+    └── shader-bridge.js  # ShaderBridge (uniform mapping)
+```
 
-**gui-style.css** - Custom GUI styling
-- Horizontal bottom layout with three main sections (Stripes, Warp Box, Dance)
-- Preset buttons section at the top
-- Dark translucent background
-- Responsive flexbox layout
+**Application Layer:**
+- `gui.js` - Initializes modules and provides API
+- `sketch.js` - p5.js entry point and main loop
+- `landing.js` - Landing page interaction
 
-**fm.frag** - Fragment shader (GLSL)
-- Implements FM synthesis visualization using 2D sinusoidal grids
-- Creates carrier waves in X and Y dimensions
-- Modulates both frequency and amplitude using circular waves from a center point
-- Includes simplex noise functions (currently unused but available)
-- LFO drives real-time parameter animation within the shader
+**Shaders:**
+- `fm.frag` - Fragment shader (FM synthesis visualization)
+- `shader.vert` - Vertex shader (passthrough)
 
-**shader.vert** - Vertex shader (GLSL)
-- Simple passthrough vertex shader
-- Transforms coordinates to cover entire canvas
+### Data Flow
 
-### Parameter Flow
+```
+User Input → GUIController → ParameterStore → ShaderBridge → GLSL Shaders → Visual Output
+                                    ↑
+                                LFOEngine (for presets)
+```
 
-1. User adjusts GUI controls OR selects a preset → `params` object updated
-2. If preset active: `updateParamsFromLFOs()` calculates sinusoidal modulation → overwrites `params` values
-3. `setShaderUniforms()` passes current `params` to fragment shader
-4. Fragment shader renders visual output based on uniforms
-5. `updateGUI()` syncs GUI display with current parameter values
+### Key Architecture Principles
+
+1. **ParameterStore** is the single source of truth for all parameters
+2. **Core modules** have no UI dependencies
+3. **UI modules** only read from ParameterStore, never modify directly
+4. **Unidirectional data flow** from parameters to rendering
+5. **IIFE pattern** for module encapsulation without build tools
 
 ### Key Concepts
 
@@ -82,20 +85,27 @@ The application runs entirely in the browser with no backend or build process.
 
 ## Common Modifications
 
-**Adding a new parameter:**
-1. Add to `params` object in [gui.js](gui.js)
-2. Add HTML control in `setupGUI()` within the appropriate section
-3. Add to controls array in `attachEventListeners()` with id, param name, and decimals
-4. Add to controls array in `updateGUI()` for LFO preset synchronization
-5. Add `setUniform()` call in `setShaderUniforms()`
-6. Declare uniform in [fm.frag](fm.frag) and use in shader logic
+### Adding a New Parameter
 
-**Creating a new preset:**
-1. Define function in [sketch.js](sketch.js) that sets `activeLFOMap`
-2. Add button in the presets section in `setupGUI()` HTML
-3. LFO map structure: `{ paramName: { frequency, amplitude, center, phase } }`
+1. Add to ParameterStore initialization in [gui.js](gui.js)
+2. Add to ParameterStore definitions in [src/core/parameters.js](src/core/parameters.js)
+3. Add HTML control in [src/ui/gui-builder.js](src/ui/gui-builder.js)
+4. Add event listener in [src/ui/gui-controller.js](src/ui/gui-controller.js)
+5. Add shader uniform in [src/rendering/shader-bridge.js](src/rendering/shader-bridge.js)
+6. Declare and use uniform in [fm.frag](fm.frag)
 
-**Modifying visual output:**
-- Edit the fragment shader [fm.frag](fm.frag)
-- The main synthesis happens in `main()` function
-- Simplex noise function available via `snoise(vec2)` for alternative modulation
+**See detailed example in [ARCHITECTURE.md](ARCHITECTURE.md#adding-a-new-parameter)**
+
+### Creating a New Preset
+
+1. Add preset definition to [src/core/presets.js](src/core/presets.js)
+2. Add button in [src/ui/gui-builder.js](src/ui/gui-builder.js)
+3. Add wrapper function in [sketch.js](sketch.js) (for backwards compatibility)
+
+**See detailed example in [ARCHITECTURE.md](ARCHITECTURE.md#adding-a-new-preset)**
+
+### Modifying Visual Output
+
+- Edit [fm.frag](fm.frag) fragment shader
+- Main synthesis happens in `main()` function
+- Simplex noise available via `snoise(vec2)`
