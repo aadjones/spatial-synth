@@ -16,17 +16,19 @@ const parameterStore = new ParameterStore({
 // Backwards compatibility - keep params object for now
 let params = parameterStore.getAll();
 
-// Global GUI instances
+// Global instances
 let guiBuilder;
 let guiController;
+let shaderBridge;
 
-// Backwards compatibility - expose activeLFOMap for shader bridge
+// Backwards compatibility - expose activeLFOMap for external use
 let activeLFOMap = null;
 
 function setupGUI() {
-  // Create builder and controller
+  // Create instances
   guiBuilder = new GUIBuilder();
   guiController = new GUIController(parameterStore, presetManager, lfoEngine);
+  shaderBridge = new ShaderBridge(parameterStore);
 
   // Build and insert HTML
   const html = guiBuilder.buildHTML(parameterStore.getAll());
@@ -69,17 +71,5 @@ function updateGUI() {
 
 // Shader bridge - called from draw loop
 function setShaderUniforms() {
-  myShader.setUniform('u_resolution', [width, height]);
-  myShader.setUniform('u_carrierFreqX', params.carrierFreqX);
-  myShader.setUniform('u_carrierFreqY', params.carrierFreqY);
-  myShader.setUniform('u_modulatorFreq', params.modulatorFreq);
-  myShader.setUniform('u_modulationIndex', params.modulationIndex);
-  myShader.setUniform('u_modulationCenter', [
-    2 * params.modulationCenterX,
-    2 * params.modulationCenterY,
-  ]);
-  myShader.setUniform('u_amplitudeModulationIndex', params.amplitudeModulationIndex);
-  myShader.setUniform('u_lfoFrequency', params.lfoFrequency);
-  myShader.setUniform('u_lfoAmplitude', params.lfoAmplitude);
-  myShader.setUniform('u_time', millis() / 1000.0);
+  shaderBridge.setUniforms(myShader, width, height, millis());
 }
