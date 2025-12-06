@@ -46,7 +46,9 @@ const GUIBuilder = (function () {
           <div class="presets-layout">
             <div class="preset-group">
               <h3>YOUR CREATION</h3>
-              <button onclick="setPreset('manual')" class="preset-btn" data-preset="manual">MANUAL</button>
+              <div class="preset-buttons">
+                <button onclick="setPreset('manual')" class="preset-btn" data-preset="manual">MANUAL</button>
+              </div>
             </div>
             <div class="preset-divider"></div>
             <div class="preset-group">
