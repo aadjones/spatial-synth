@@ -16,6 +16,7 @@ Spatial Synthesizer is a web-based generative art piece that creates dynamic vis
   - Time modulation (speed and intensity)
 - **Artist presets** including Gentle Waves, Wild Ripple, and Pulsating Eye
 - **Keyboard shortcuts**:
+  - `Space` - Freeze/unfreeze animation
   - `H` - Hide/show controls
   - `S` - Save screenshot
   - `ESC` - Exit fullscreen

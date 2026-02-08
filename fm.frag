@@ -9,9 +9,7 @@ uniform float u_modulatorFreq;
 uniform float u_modulationIndex; // Base value for frequency modulation index
 uniform float u_amplitudeModulationIndex; // Base value for amplitude modulation index
 uniform vec2 u_modulationCenter;
-uniform float u_time; // Time variable to drive the LFO
-uniform float u_lfoFrequency; // Frequency of the LFO (how fast it oscillates)
-uniform float u_lfoAmplitude; // Amplitude of the LFO (how much it modulates parameters)
+uniform float u_lfo; // Precomputed LFO value (computed in JS for smooth transitions)
 
 vec3 mod289(vec3 x) { return x - floor(x / 289.0) * 289.0; }
 vec2 mod289(vec2 x) { return x - floor(x / 289.0) * 289.0; }
@@ -49,10 +47,7 @@ void main() {
   // Normalize coordinates to range [-1, 1]
   vec2 st = gl_FragCoord.xy / u_resolution * 2.0 - 1.0;
 
-  // LFO: A sinusoidal wave oscillating over time
-  float lfo = sin(2.0 * 3.14159 * u_lfoFrequency * u_time) * u_lfoAmplitude;
-  
-  // float lfo = snoise(vec2(u_time * u_lfoFrequency, 0.0)) * u_lfoAmplitude;
+  float lfo = u_lfo;
 
   // Modulate parameters using the LFO
   float dynamicModulationIndex = u_modulationIndex + lfo;

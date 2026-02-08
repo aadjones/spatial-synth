@@ -9,9 +9,15 @@
  */
 
 const ShaderBridge = (function () {
+  const TWO_PI = 2 * Math.PI;
+  const SMOOTH_TIME = 0.1; // seconds for amplitude smoothing
+
   class ShaderBridge {
     constructor(parameterStore) {
       this._parameterStore = parameterStore;
+      this._lfoPhase = 0;
+      this._lastTimeSeconds = 0;
+      this._smoothedAmplitude = parameterStore.get('lfoAmplitude');
     }
 
     /**
@@ -23,6 +29,9 @@ const ShaderBridge = (function () {
      */
     setUniforms(shader, width, height, timeMillis) {
       const params = this._parameterStore.getAll();
+      const timeSeconds = timeMillis / 1000.0;
+      const dt = timeSeconds - this._lastTimeSeconds;
+      this._lastTimeSeconds = timeSeconds;
 
       // Resolution
       shader.setUniform('u_resolution', [width, height]);
@@ -44,10 +53,17 @@ const ShaderBridge = (function () {
         2 * params.modulationCenterY,
       ]);
 
-      // LFO/Time parameters
-      shader.setUniform('u_lfoFrequency', params.lfoFrequency);
-      shader.setUniform('u_lfoAmplitude', params.lfoAmplitude);
-      shader.setUniform('u_time', timeMillis / 1000.0);
+      // LFO: phase accumulator for smooth frequency transitions
+      if (dt > 0 && dt < 1) {
+        this._lfoPhase += TWO_PI * params.lfoFrequency * dt;
+      }
+
+      // Smooth amplitude changes to avoid visual jumps
+      const alpha = 1 - Math.exp(-dt / SMOOTH_TIME);
+      this._smoothedAmplitude += (params.lfoAmplitude - this._smoothedAmplitude) * alpha;
+
+      const lfoValue = Math.sin(this._lfoPhase) * this._smoothedAmplitude;
+      shader.setUniform('u_lfo', lfoValue);
     }
   }
 

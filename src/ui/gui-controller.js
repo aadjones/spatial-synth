@@ -69,6 +69,14 @@ const GUIController = (function () {
     }
 
     /**
+     * Sync dance parameters to shader-facing values.
+     * Called after unpausing to apply any changes made while frozen.
+     */
+    syncDanceParams() {
+      this._updateDanceParams();
+    }
+
+    /**
      * Change speed level
      */
     changeSpeed(delta) {
@@ -155,6 +163,9 @@ const GUIController = (function () {
      * Update dance parameters based on discrete levels
      */
     _updateDanceParams() {
+      // Skip updating shader-facing LFO params while animation is frozen
+      if (typeof animationPaused !== 'undefined' && animationPaused) return;
+
       const speedLevel = this._parameterStore.get('speedLevel');
       const intensityLevel = this._parameterStore.get('intensityLevel');
 

@@ -12,6 +12,18 @@ let myShader;
 let lfoEngine;
 let presetManager;
 
+// Animation pause state
+let animationPaused = false;
+let pauseTimeOffset = 0;
+let lastPauseStart = 0;
+
+function getAnimationTime() {
+  if (animationPaused) {
+    return lastPauseStart - pauseTimeOffset;
+  }
+  return millis() - pauseTimeOffset;
+}
+
 function preload() {
   myShader = loadShader('shader.vert', 'fm.frag');
 }
@@ -29,8 +41,10 @@ function setup() {
 }
 
 function draw() {
+  const animTime = getAnimationTime();
+
   // Update LFO-controlled parameters
-  lfoEngine.update(millis() / 1000.0);
+  lfoEngine.update(animTime / 1000.0);
 
   // Keep legacy params object in sync for setShaderUniforms
   params = parameterStore.getAll();
@@ -39,7 +53,7 @@ function draw() {
   activeLFOMap = lfoEngine.getMap();
 
   updateGUI();
-  setShaderUniforms();
+  setShaderUniforms(animTime);
   shader(myShader);
   rect(0, 0, width, height);
 }
@@ -60,6 +74,19 @@ function mousePressed() {
 function keyPressed() {
   if (keyCode === ESCAPE && fullscreen()) {
     fullscreen(false);
+  }
+
+  // Toggle animation pause with spacebar
+  if (key === ' ') {
+    if (animationPaused) {
+      pauseTimeOffset += millis() - lastPauseStart;
+      animationPaused = false;
+      // Sync any speed/intensity changes made while frozen
+      guiController.syncDanceParams();
+    } else {
+      lastPauseStart = millis();
+      animationPaused = true;
+    }
   }
 
   // Save screenshot with 's' key

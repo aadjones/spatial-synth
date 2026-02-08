@@ -78,6 +78,6 @@ function updateGUI() {
 }
 
 // Shader bridge - called from draw loop
-function setShaderUniforms() {
-  shaderBridge.setUniforms(myShader, width, height, millis());
+function setShaderUniforms(animTime) {
+  shaderBridge.setUniforms(myShader, width, height, animTime);
 }
